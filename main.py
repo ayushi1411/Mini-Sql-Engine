@@ -1,14 +1,19 @@
 import csv
 import sqlparse
-def getData():
-	with open('table1.csv','rb') as file:
-		data = csv.reader(file, delimiter = ',')
-		for row in data:
-			print row
+def getData(f):
+	fileName = f + '.csv'
+#	print fileName
+	data = []
+	with open(fileName,'rb') as file:
+		dt = csv.reader(file, delimiter = ',')
+		for row in dt:
+			data.append(row)
+#	print data	
+	return data
 
 def queryParse():
-	str = "select * from a where sal>500;"
-	parsed = sqlparse.parse(str);
+	query = "select * from a where sal>500;"
+	parsed = sqlparse.parse(query);
 	stmt = parsed[0]
 	print stmt.tokens[-1]
 	#print str(parsed[1])
@@ -30,9 +35,26 @@ def getSchema():
 			schema[tableName].append(row.strip())
 
 #	print schema
-	
+def selectQuery(cols, tables):
+	tableName = tables[0]
+	data = getData(tableName)
+	displayOutput(data , cols, tableName)
+
+def displayOutput(data, cols, tableName):
+	lineWidth = 20
+	for it in cols:
+		header = tableName+"."+it
+		print header.ljust(lineWidth),
+	print
+	for row in data:
+		for ele in row:
+			print ele.ljust(lineWidth),
+		print
+
 if __name__ == "__main__":
 	global schema;
 	schema = dict()
 	getSchema()
+	selectQuery(['A','B','C'],['table1'])
+#	getData()
 
