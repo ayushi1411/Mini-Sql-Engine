@@ -14,12 +14,22 @@ def queryParse():
 	#print str(parsed[1])
 
 def getSchema():
-	file = open('metadata.txt','r')
+	file = open('metadata.txt','rb')
+	flag = 0
+	tableName=""
 	for row in file:
-		if row != '\n':
-			print row
-	print file
-	print type(file)
+		if row.strip() == "<begin_table>":
+			flag = 1
+
+		elif flag == 1:
+			tableName = row.strip()
+			schema[tableName] = []
+			flag = 0
+
+		elif row.strip() != "<end_table>" and flag == 0:
+			schema[tableName].append(row.strip())
+
+#	print schema
 	
 if __name__ == "__main__":
 	global schema;
