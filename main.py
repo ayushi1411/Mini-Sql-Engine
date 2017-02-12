@@ -1,5 +1,6 @@
 import csv
 import sqlparse
+import re
 def getData(f):
 	fileName = f + '.csv'
 	data = []
@@ -51,12 +52,13 @@ def selectQuery(cols, tables):
 				dt.append(row[i])
 		reqData.append(dt)
 #	print reqData
-	displayOutput(reqData , cols, tableName)
+#	displayOutput(reqData , cols, tableName)
+	return reqData
 
 def displayOutput(data, cols, tableName):
 	lineWidth = 20
 	for it in cols:
-		header = tableName+"."+it
+		header = tableName + "." + it
 		print header.ljust(lineWidth),
 	print
 	for row in data:
@@ -66,21 +68,43 @@ def displayOutput(data, cols, tableName):
 
 def processQuery(query):
 	stmt = queryParse(query)
-	
-	tables = []
-	tbllist = str(stmt.tokens[6]).split(',')
-	for ele in tbllist:
-		tables.append(ele)
 
 	columns = []
-	if str(stmt.tokens[2]) == '*':
+	indexForColName = 2
+	flagDistinct = 0
+	columnToken = str(stmt.tokens[indexForColName])
+
+	if str(stmt.tokens[indexForColName]) == "distinct":
+		indexForColName = 4
+		columnToken = str(stmt.tokens[indexForColName])
+		flagDistinct = 1
+
+	else:
+		distinctCase2 = re.split('[( )]',str(stmt.tokens[indexForColName]))
+		if distinctCase2[0] == "distinct":
+			columnToken = distinctCase2[1]
+			flagDistinct = 1
+
+	tables = []
+	tbllist = str(stmt.tokens[indexForColName + 4]).split(',')
+	for ele in tbllist:
+		tables.append(ele)
+	if columnToken == '*':
 		for ele in schema[tables[0]]:
 			columns.append(ele)
+	
 	else:
-		collist = str(stmt.tokens[2]).split(',')
+		collist = columnToken.split(',')
 		for ele in collist:
 			columns.append(ele)
-	selectQuery(columns,tables)
+
+	selectData = selectQuery(columns,tables)
+	reqData = []
+	if flagDistinct == 1:
+		for ele in selectData:
+			if ele not in reqData:
+				reqData.append(ele)
+	displayOutput(reqData, columns, tables[0])
 
 
 if __name__ == "__main__":
