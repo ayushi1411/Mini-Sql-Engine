@@ -66,20 +66,20 @@ def displayOutput(data, cols, tableName):
 
 def processQuery(query):
 	stmt = queryParse(query)
-	columns = []
-	if stmt.tokens[2] == '*':
-		columns.append('*')
-	else:
-	#	print type(stmt.tokens[2])
-		collist = str(stmt.tokens[2]).split(',')
-		for ele in collist:
-			columns.append(ele)
-
+	
 	tables = []
 	tbllist = str(stmt.tokens[6]).split(',')
 	for ele in tbllist:
 		tables.append(ele)
 
+	columns = []
+	if str(stmt.tokens[2]) == '*':
+		for ele in schema[tables[0]]:
+			columns.append(ele)
+	else:
+		collist = str(stmt.tokens[2]).split(',')
+		for ele in collist:
+			columns.append(ele)
 	selectQuery(columns,tables)
 
 
