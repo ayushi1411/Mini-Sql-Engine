@@ -2,25 +2,21 @@ import csv
 import sqlparse
 def getData(f):
 	fileName = f + '.csv'
-#	print fileName
 	data = []
 	with open(fileName,'rb') as file:
 		dt = csv.reader(file, delimiter = ',')
 		for row in dt:
 			data.append(row)
-#	print data	
 	return data
 
 def queryParse(query):
-#	query = "select a.A, B from a where sal>500;"
 	parsed = sqlparse.parse(query);
 	return parsed[0]
 #	stmt = parsed[0]
 #	print stmt.tokens[2]
-	#print str(parsed[1])
+#	print str(parsed[1])
 
 def getSchema():
-#	global schema
 	file = open('metadata.txt','rb')
 	flag = 0
 	tableName=""
@@ -35,10 +31,9 @@ def getSchema():
 
 		elif row.strip() != "<end_table>" and flag == 0:
 			schema[tableName].append(row.strip())
-
 #	print schema
+
 def selectQuery(cols, tables):
-#	global schema
 	tableName = tables[0]
 	data = getData(tableName)
 	columnsOfTable = schema[tableName]
@@ -59,7 +54,6 @@ def selectQuery(cols, tables):
 	displayOutput(reqData , cols, tableName)
 
 def displayOutput(data, cols, tableName):
-#	global schema
 	lineWidth = 20
 	for it in cols:
 		header = tableName+"."+it
@@ -71,7 +65,6 @@ def displayOutput(data, cols, tableName):
 		print
 
 def processQuery(query):
-#	global schema
 	stmt = queryParse(query)
 	columns = []
 	if stmt.tokens[2] == '*':
@@ -87,8 +80,6 @@ def processQuery(query):
 	for ele in tbllist:
 		tables.append(ele)
 
-#	print columns
-#	print tables
 	selectQuery(columns,tables)
 
 
@@ -99,9 +90,4 @@ if __name__ == "__main__":
 	query = raw_input()
 	getSchema()
 	processQuery(query)
-#	queryParse()
-	
-	
-#	selectQuery(['A','B','C'],['table1'])
-#	getData()
 
