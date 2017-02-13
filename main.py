@@ -47,7 +47,7 @@ def selectQuery(cols, tables): # implements the select part of the query
 		dt = []
 		for i in range(len(row)):
 			if i in columnNumber:
-				dt.append(row[i])
+				dt.append(int(row[i]))
 		reqData.append(dt)
 #	displayOutput(reqData , cols, tableName)
 	return reqData
@@ -60,7 +60,7 @@ def displayOutput(data, cols, tableName): #displays the required final output
 	print
 	for row in data:
 		for ele in row:
-			print ele.ljust(lineWidth),
+			print str(ele).ljust(lineWidth),
 		print
 
 def processQuery(query):
@@ -70,6 +70,7 @@ def processQuery(query):
 	indexForColName = 2 #index of column names in the parsed tokens
 	flagDistinct = 0	#to check if distinct values need to be output
 	columnToken = str(stmt.tokens[indexForColName])	#token with columnnames
+	flagAggregate = 0
 
 	if str(stmt.tokens[indexForColName]) == "distinct": #case : distinct <columnname>
 		indexForColName = 4	#if distinct <column name>, then token index is 4
@@ -77,10 +78,15 @@ def processQuery(query):
 		flagDistinct = 1
 
 	else: #case : distinct(<columnname>) or aggregate functions
-		distinctCase2 = re.split('[( )]',str(stmt.tokens[indexForColName]))	
-		if distinctCase2[0] == "distinct":
-			columnToken = distinctCase2[1]
+		case2 = re.split('[( )]',str(stmt.tokens[indexForColName]))	
+		func = case2[0]
+		columnToken = case2[1]
+		if func == "distinct":
+#			columnToken = case2[1]
 			flagDistinct = 1
+
+		elif func == "max" or func == "min" or func == "sum" or func == "avg":
+			flagAggregate = 1
 
 	#get tablenames
 	tables = []
@@ -107,6 +113,40 @@ def processQuery(query):
 		for ele in selectData:
 			if ele not in reqData:
 				reqData.append(ele)
+
+	elif flagAggregate == 1:
+		if(len(selectData[0]) > 1):
+			print "only one column allowed in aggregate functions"
+		
+		else : 			
+			l1 = []
+			for ele in selectData:
+				for val in ele:
+					l1.append(val)
+
+
+			if func == "max":
+				l = []
+				l.append(max(l1)) 
+				reqData.append(l)
+
+			elif func == "min":
+				print l1
+				l = []
+				l.append(min(l1)) 
+				reqData.append(l)
+
+			elif func == "sum":
+				l = []
+				l.append(sum(l1)) 
+				reqData.append(l)
+
+			elif func == "avg":
+				l = []
+				l.append(sum(l1)/(float)(len(l1))) 
+				reqData.append(l)
+
+
 	displayOutput(reqData, columns, tables[0])
 
 
