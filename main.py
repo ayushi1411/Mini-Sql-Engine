@@ -156,7 +156,7 @@ if __name__ == "__main__":
 #	print "prompt> "
 #	query = raw_input()
 	query = (' ').join(sys.argv[1:])
-	print query
+#	print query
 	getSchema()
 	processQuery(query)
 
