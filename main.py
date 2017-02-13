@@ -13,9 +13,6 @@ def getData(f): #read table data from file
 def queryParse(query): #parse the query
 	parsed = sqlparse.parse(query);
 	return parsed[0]
-#	stmt = parsed[0]
-#	print stmt.tokens[2]
-#	print str(parsed[1])
 
 def getSchema(): #get schema of tables from the metadata file
 	file = open('metadata.txt','rb')
@@ -32,7 +29,6 @@ def getSchema(): #get schema of tables from the metadata file
 
 		elif row.strip() != "<end_table>" and flag == 0:
 			schema[tableName].append(row.strip())
-#	print schema
 
 def selectQuery(cols, tables): # implements the select part of the query
 	tableName = tables[0] 
@@ -82,7 +78,6 @@ def processQuery(query):
 		func = case2[0]
 		columnToken = case2[1]
 		if func == "distinct":
-#			columnToken = case2[1]
 			flagDistinct = 1
 
 		elif func == "max" or func == "min" or func == "sum" or func == "avg":
