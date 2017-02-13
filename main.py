@@ -1,6 +1,7 @@
 import csv
 import sqlparse
 import re
+import sys
 def getData(f): #read table data from file
 	fileName = f + '.csv'
 	data = []
@@ -76,12 +77,14 @@ def processQuery(query):
 	else: #case : distinct(<columnname>) or aggregate functions
 		case2 = re.split('[( )]',str(stmt.tokens[indexForColName]))	
 		func = case2[0]
-		columnToken = case2[1]
+		
 		if func == "distinct":
 			flagDistinct = 1
+			columnToken = case2[1]
 
 		elif func == "max" or func == "min" or func == "sum" or func == "avg":
 			flagAggregate = 1
+			columnToken = case2[1]
 
 	#get tablenames
 	tables = []
@@ -140,7 +143,9 @@ def processQuery(query):
 				l = []
 				l.append(sum(l1)/(float)(len(l1))) 
 				reqData.append(l)
-
+	else:
+		for ele in selectData:
+			reqData.append(ele)
 
 	displayOutput(reqData, columns, tables[0])
 
@@ -148,8 +153,10 @@ def processQuery(query):
 if __name__ == "__main__":
 	global schema;
 	schema = dict()
-	print "prompt> "
-	query = raw_input()
+#	print "prompt> "
+#	query = raw_input()
+	query = (' ').join(sys.argv[1:])
+	print query
 	getSchema()
 	processQuery(query)
 
