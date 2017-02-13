@@ -1,7 +1,7 @@
 import csv
 import sqlparse
 import re
-def getData(f):
+def getData(f): #read table data from file
 	fileName = f + '.csv'
 	data = []
 	with open(fileName,'rb') as file:
@@ -10,14 +10,14 @@ def getData(f):
 			data.append(row)
 	return data
 
-def queryParse(query):
+def queryParse(query): #parse the query
 	parsed = sqlparse.parse(query);
 	return parsed[0]
 #	stmt = parsed[0]
 #	print stmt.tokens[2]
 #	print str(parsed[1])
 
-def getSchema():
+def getSchema(): #get schema of tables from the metadata file
 	file = open('metadata.txt','rb')
 	flag = 0
 	tableName=""
@@ -34,28 +34,25 @@ def getSchema():
 			schema[tableName].append(row.strip())
 #	print schema
 
-def selectQuery(cols, tables):
-	tableName = tables[0]
-	data = getData(tableName)
-	columnsOfTable = schema[tableName]
+def selectQuery(cols, tables): # implements the select part of the query
+	tableName = tables[0] 
+	data = getData(tableName) # get table data
+	columnsOfTable = schema[tableName] #the columns in the table
 	columnNumber = []
 	for ele in cols:
 		pos = columnsOfTable.index(ele)
-		columnNumber.append(pos)
+		columnNumber.append(pos)	#get the column number for the required fields
 	reqData = []
-#	print columnNumber
-	for row in data:
+	for row in data:	#get data for the required fields only
 		dt = []
 		for i in range(len(row)):
 			if i in columnNumber:
-			#	print "i-> ",i 
 				dt.append(row[i])
 		reqData.append(dt)
-#	print reqData
 #	displayOutput(reqData , cols, tableName)
 	return reqData
 
-def displayOutput(data, cols, tableName):
+def displayOutput(data, cols, tableName): #displays the required final output
 	lineWidth = 20
 	for it in cols:
 		header = tableName + "." + it
@@ -70,25 +67,28 @@ def processQuery(query):
 	stmt = queryParse(query)
 
 	columns = []
-	indexForColName = 2
-	flagDistinct = 0
-	columnToken = str(stmt.tokens[indexForColName])
+	indexForColName = 2 #index of column names in the parsed tokens
+	flagDistinct = 0	#to check if distinct values need to be output
+	columnToken = str(stmt.tokens[indexForColName])	#token with columnnames
 
-	if str(stmt.tokens[indexForColName]) == "distinct":
-		indexForColName = 4
+	if str(stmt.tokens[indexForColName]) == "distinct": #case : distinct <columnname>
+		indexForColName = 4	#if distinct <column name>, then token index is 4
 		columnToken = str(stmt.tokens[indexForColName])
 		flagDistinct = 1
 
-	else:
-		distinctCase2 = re.split('[( )]',str(stmt.tokens[indexForColName]))
+	else: #case : distinct(<columnname>) or aggregate functions
+		distinctCase2 = re.split('[( )]',str(stmt.tokens[indexForColName]))	
 		if distinctCase2[0] == "distinct":
 			columnToken = distinctCase2[1]
 			flagDistinct = 1
 
+	#get tablenames
 	tables = []
 	tbllist = str(stmt.tokens[indexForColName + 4]).split(',')
 	for ele in tbllist:
 		tables.append(ele)
+
+	#retrieve the columnames from the column token
 	if columnToken == '*':
 		for ele in schema[tables[0]]:
 			columns.append(ele)
@@ -98,7 +98,10 @@ def processQuery(query):
 		for ele in collist:
 			columns.append(ele)
 
+	#get data for required columns
 	selectData = selectQuery(columns,tables)
+
+	#delete repeated data in case of distinct
 	reqData = []
 	if flagDistinct == 1:
 		for ele in selectData:
