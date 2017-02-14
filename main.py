@@ -150,7 +150,39 @@ def processQuery(query):
 				reqData.append(ele)
 		tables = tables * len(columns)
 
-			
+#where on one table and one condition
+		whereClause = str(stmt.tokens[-1])
+	#	print whereClause
+		whereClause1 = whereClause.split(' ')
+	#	print whereClause1
+		if whereClause1[0] == "where":
+		#	op = ['>', '<', '=', '<=', '>=', '!=']
+		#	whereClause = re.split('[> < = <= >= !=]',whereClause1)
+		#	if '' in whereClause:
+		#		whereClause.remove('')
+			clm = whereClause1[1]
+			op = whereClause1[2]
+			num = whereClause1[3].split(";")[0]
+			num = int(num)
+
+			columnstemp = []
+			for ele in schema[tables[0]]:
+				columnstemp.append(ele)
+			postemp = schema[tables[0]].index(clm)
+			sdata = selectQuery(columnstemp,tables)
+			rownumber = []
+			i = 0
+			for ele in sdata:
+				cond = str(ele[postemp]) + str(op) + str(num)
+				if eval(cond) == True:
+					rownumber.append(i)
+				i+=1
+			tempdata = []
+			for i in range(len(reqData)):
+				if i in rownumber:
+					tempdata.append(reqData[i])
+
+			reqData = tempdata
 
 	else:
 		whereClause = str(stmt.tokens[-1])
